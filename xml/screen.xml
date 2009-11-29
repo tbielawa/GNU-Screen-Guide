@@ -1,0 +1,534 @@
+<?xml version="1.0" encoding="utf-8"?>
+<chapter xmlns="http://docbook.org/ns/docbook"
+	 version="5.0"
+	 xml:id="Screen">
+
+  <info>
+    <title>Using <command>GNU Screen</command></title>
+    <author>
+      <personname>
+	<firstname>Tim</firstname>
+	<surname>Bielawa</surname>
+	<othername>Shaggy</othername>
+	</personname>
+	<contrib>
+	  Author
+	</contrib>
+	<email>timbielawa@gmail.com</email>
+    </author>
+  </info>
+
+  <para>
+    Some tasks you may have to perform will take a long time to
+    finish, <command>GNU screen</command> is a great command line tool
+    to use to make those tasks easier. <command>Screen</command> has a
+    lot of other powerful uses too, in addition to detachment. At the
+    end of this chapter you'll know how to start
+    <command>screen</command>, detach a <command>screen</command>
+    session, reattach a <command>screen</command>, create new shells
+    inside a <command>screen</command>, switch between them, and do
+    some basic <command>screen</command> configuration.
+  </para>
+
+  <section xml:id="Screen-Basics">
+    <title>Screen Basics</title>
+
+    <section xml:id="Screen-Starting">
+      <title>Starting Screen</title>
+    
+      <para>
+	Starting screen is easy! <xref linkend="Screen-Starting-Example"/> demonstrates starting <command>screen</command>.
+      </para>
+      
+      <example xml:id="Screen-Starting-Example">
+	<title>Starting Screen</title>
+
+	<programlisting>
+&lt;tbielawa&gt;@(shell001)[~] 01:07:34
+$ screen</programlisting>
+      </example>
+
+      <para>
+	Easy right? Your screen should have blanked and returned with
+	a normal prompt at the top of your terminal.
+      </para>
+
+      <note>
+	<para>
+	  Your scrollback buffer won't work like normal
+	  now. Scrollback is explained in the following sections.
+	</para>
+      </note>
+
+      <example xml:id="Screen-Exiting-Example">
+	<title>Exiting Screen</title>
+	<programlisting>
+&lt;tbielawa&gt;@(shell001)[~] 01:07:34
+$ exit
+[screen is terminating]
+&lt;tbielawa&gt;@(shell001)[~] 01:07:56
+$ </programlisting>
+      </example>
+      
+      <para>
+	As you can see in <xref linkend="Screen-Exiting-Example"/>, exiting screen works like exiting a normal
+	shell. The normal
+	<keycap>C</keycap>-<keycap>d</keycap>
+	sequence still works for exiting a shell.
+      </para>
+    </section>
+
+    <section xml:id="Screen-Command-Keys">
+      <title>Command Keys</title>
+
+      <para>
+	Throughout this chapter you'll see command sequences displayed
+	in the following format: <keycap
+	function="control">C</keycap>-<keycap>a</keycap>
+	<keycap>x</keycap>. This means to press the <keycap
+	function="control">Control</keycap> key and the
+	<keycap>a</keycap> key at the time then press the
+	<keycap>x</keycap> key afterwards. <keycap
+	function="control">C</keycap>-<keycap>a</keycap> is the
+	standard sequence to press when starting a screen command.
+      </para>
+
+      <note>
+	<para>
+	  Depending on the documentation you solicit you will find the
+	  "Control+x" sequence written in a few different
+	  ways. <keycap
+	  function="control">^</keycap><keycap>x</keycap> is one
+	  common way, <keycap>C</keycap>-<keycap>x</keycap> the other
+	  most common way.
+	</para>
+      </note>
+    </section>
+
+    <section xml:id="Screen-Scrollback">
+      <title>Scrollback in Screen</title>
+
+      <para>
+	You can still scroll back in screen. The default scrollback
+	buffer is usually set around 1000 lines, much more than the
+	default 300 or so in your normal bash shell. You can't
+	<keycap function="shift">Shift</keycap>-<keycap
+	function="pageup">PgUp</keycap> like normal to see
+	it though. To scroll in screen you need to enter
+	"copy/scrollback" mode.
+      </para>
+
+      <para>
+	<keycap function="control">C</keycap>-<keycap>a</keycap>
+	<keycap function="escape">Esc</keycap> is the sequence to
+	enter scrollback mode. When entering, should get a block
+	cursor on your screen, the cursor indicates where you are for
+	selection commands. Use the <keycap function="up">Up</keycap>,
+	<keycap function="down">Down</keycap>, <keycap
+	function="pageup">Page Up</keycap>, and <keycap
+	function="pagedown">Page Down</keycap> keys to navigate. When
+	you're finished you can just press <keycap
+	function="escape">Escape</keycap> once or twice to exit
+	copy/scrollback mode.
+      </para>
+    </section>
+  </section>
+  
+  <section xml:id="Screen-Attaching">
+    <title>Detaching and Reattaching Screen Sessions</title>
+
+    <para>
+      The ability to detach and reattach screen sessions is arguably
+      the most powerful functionality <command>screen</command>
+      provides. A detached screen behaves similar to a backgrounded
+      task in that it continues to run uninterrupted leaving your
+      shell free to run other tasks. Screen sessions differ from
+      backgrounded tasks in that they are persistent through logouts
+      and aren't affected by terminating the parent process (usually a
+      shell) that launched them. A detached screen can be resumed at
+      any time from any shell. <emphasis>This</emphasis> is exactly
+      what makes screen detaching so much more useful than just
+      backgrounding long running tasks.
+    </para>
+
+    <itemizedlist>
+      <title>Tasks you'd want to detach</title>
+
+      <listitem>
+	<para>
+	  <command>dput</command>ting large packages
+	</para>
+      </listitem>
+      <listitem>
+	<para>
+	  (de)compressing large archives
+	</para>
+      </listitem>
+      <listitem>
+	<para>
+	  restoring from backups
+	</para>
+      </listitem>
+      <listitem>
+	<para>
+	  transferring large files
+	</para>
+      </listitem>
+    </itemizedlist>
+
+    <section xml:id="Screen-Attaching-Howto">
+      <title>Howto</title>
+
+      <para>
+	Detaching is super simple, use this command sequence: <keycap
+	function="control">C</keycap>-<keycap>a</keycap>
+	<keycap>d</keycap>. If you were successful, you should see
+	something like <xref linkend="Screen-Detaching-Example"/>.
+      </para>
+
+      <example xml:id="Screen-Detaching-Example">
+	<title>Detaching a Screen</title>
+	<programlisting>
+&lt;tbielawa&gt;@(expressomaker)[~] 01:46:01
+$ screen
+[detached]
+&lt;tbielawa&gt;@(expressomaker)[~] 02:31:42
+$ </programlisting>
+      </example>
+
+      <para>
+	Reattaching a detached screen session is generally a trivial
+	task. If your user has multiple screens detached
+	simultaniously you will have to tell screen which one you want
+	to reattach, <xref
+	linkend="Screen-Reattaching-One-Example"/>
+	demonstrates.
+      </para>
+
+      <example xml:id="Screen-Reattaching-One-Example">
+	<title>Reattaching a Screen When Only One is Detached</title>
+	<programlisting>
+&lt;tbielawa&gt;@(expressomaker)[~] 01:46:01
+$ screen -R</programlisting>
+      </example>
+
+      <para>
+	The <command>screen</command> man page describes
+	<option>-R</option> thusly: "attempts to resume the first
+	detached screen session it finds. If successful, all other
+	command-line options are ignored. If no detached session
+	exists, starts a new session using the specified options, just
+	as if <option>-R</option> had not been specified."
+      </para>
+
+      <para>
+	You may find yourself in the situation where you've been a
+	busy bee and have detached numerous screen
+	sessions. Reattaching the correct one can turn into a game of
+	guesswork since detached screen sessions are identified with
+	names like 12865.pts-0.shell003, or 14500.pts-4.fridge. As you
+	can see, names are a combination of the <acronym>PID</acronym>
+	of the screen session, the <acronym>TTY</acronym> the screen
+	is running on, and the hostname of the machine the screen is
+	running on. To help sort through this mess you can draw from
+	the fact that <acronym>PID</acronym>s are assigned
+	sequentially (though they do cycle back around), shells opened
+	in X sessions (<command>gnome-terminal</command>,
+	<command>terminator</command>, etc...) have enames like
+	'ttys005' while shells opened in <acronym>SSH</acronym>
+	sessions typically are named like 'pts-3'. Isn't it lucky that
+	you've just read the section on how to detach a screen!
+      </para>
+
+      <para>
+	Here's a practical example wherein I had
+	<acronym>SSH</acronym>d into an <acronym>LDAP</acronym> slave
+	from an office machine, began resyncing it, disconnected the
+	<acronym>SSH</acronym> session and went home, <xref linkend="Screen-Reattaching-From-Many-A-Example"/>. When I got home
+	I <acronym>SSH</acronym>d into the <acronym>LDAP</acronym>
+	slave again to check up on it, upon doing so finding out that
+	I must select which screen session I wanted to reattach to, <xref linkend="Screen-Reattaching-From-Many-B-Example"/>.
+      </para>
+
+      <example xml:id="Screen-Reattaching-From-Many-A-Example">
+	<title>Reattaching When Multiple Screens are Detached (Part-A)</title>
+	
+	<programlisting>
+&lt;tbielawa&gt;@(sinister)[~] 03:07:34
+$ ssh root@ldapslave002
+Last login: Sun Aug  2 03:12:22 2009 from 157.182.95.88
+Linux ldapslave002 2.6.15-54-server #1 SMP Thu Apr 2 21:27:55 UTC 2009 i686 GNU/Linux
+
+The programs included with the Ubuntu system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
+applicable law.
+root@ldapslave002:~# screen
+root@ldapslave002:~# invoke-rc.d slapd stop
+Stopping OpenLDAP: slapd.
+root@ldapslave002:~# rm -fR /srv/ldap/*
+root@ldapslave002:~# slapadd &lt; 2009-08-02
+[detached]
+root@ldapslave002:~# logout
+Connection to ldapslave002 closed.
+&lt;tbielawa&gt;@(sinister)[~] 03:10:59
+$ exit</programlisting>
+      </example>
+
+      <note>
+	<para>
+	  At this point my screen session is running detached on
+	  <systemitem class="systemname">ldapslave002</systemitem>.
+	</para>
+      </note>
+
+      <example xml:id="Screen-Reattaching-From-Many-B-Example">
+	<title>Reattaching When Multiple Screens are Detached (Part-B)</title>
+
+	<programlisting>
+&lt;tbielawa&gt;@(expressomaker)[~] 03:25:55
+$ ssh root@ldapslave002.lcsee.wvu.edu
+Warning: Permanently added 'ldapslave002.lcsee.wvu.edu' (RSA) to the list of known hosts.
+Last login: Sun Aug  2 03:14:15 2009 from 157.182.194.176
+Linux ldapslave002 2.6.15-54-server #1 SMP Thu Apr 2 21:27:55 UTC 2009 i686 GNU/Linux
+
+The programs included with the Ubuntu system are free software;
+the exact distribution terms for each program are described in the
+individual files in /usr/share/doc/*/copyright.
+
+Ubuntu comes with ABSOLUTELY NO WARRANTY, to the extent permitted by
+applicable law.
+root@ldapslave002:~# screen -R
+There are several suitable screens on:
+        4503.pts-4.ldapslave002(06/17/2009 12:33:35 AM)(Detached)
+        14151.pts-2.ldapslave002(08/02/2009 03:10:55 AM)(Detached)
+Type "screen [-d] -r [pid.]tty.host" to resume one of them.
+root@ldapslave002:~# screen -R 14151.pts-2.ldapslave002
+root@ldapslave002:~# invoke-rc.d slapd stop
+Stopping OpenLDAP: slapd.
+root@ldapslave002:~# rm -fR /srv/ldap/*
+root@ldapslave002:~# slapadd &lt; 2009-08-02
+root@ldapslave002:~# invoke-rc.d slapd start
+Starting OpenLDAP: slapd.
+root@ldapslave002:~# exit
+[screen is terminating]
+root@ldapslave002:~# exit
+Connection to ldapslave002.lcsee.wvu.edu closed.
+&lt;tbielawa&gt;@(expressomaker)[~] 03:17:30
+$ exit</programlisting>
+      </example>
+
+      <note>
+	<para>
+	  While it may look as though after I reattached the screen
+	  that I retyped all my commands from before, that is
+	  incorrect. Screen picked up from exactly where I left
+	  off. Furthermore, keep in mind that every time you create a
+	  new screen, detach your present screen, or resume a detached
+	  screen, that your shell will blank out and then be redrawn. The
+	  result is always the "last thing" you were doing, be that
+	  launching screen, or your work inside an screen.
+	</para>
+      </note>
+
+    </section>
+
+    <section xml:id="Screen-Advanced-Attaching">
+      <title>Attaching already Attached Screens</title>
+      
+      <para>
+	This section explains the advanced topic topic of attaching a
+	screen session that is presently open on a seperate shell to
+	your present shell. Useful in cases where you forgot to detach
+	a screen previously and no longer have access to the console
+	the screen is running on, or where something went horribly
+	wrong and screen doesn't think a screen is actually detached
+	to begin with. Or, perhaps instead you have a screen open in
+	gnome and have dropped to a virtual console where you would
+	like to have access to it.
+      </para>
+
+      <para>
+	If there is only one screen session running you can trivially
+	reattach it to your present shell by launching
+	<command>screen</command> with the <option>-D -R</option>
+	options. The <command>screen</command> man page describes this
+	combination thusly: "Attach here and now. In detail this
+	means: If a session is running, then reattach. If necessary
+	detach and logout remotely first.  If it was not running
+	create it and notify the user. This is the authors favorite."
+	Like before, if multiple screen sessions are detached already
+	you only must specify the session identifier after the
+	<option>-D -R</option> options.
+      </para>
+    </section>
+  </section>
+
+  <section xml:id="Screen-Navigating">
+    <title>Navigating around in Screen</title>
+
+    <para>
+      <command>Screen</command> also has the ability to host multiple
+      shells out of one screen session without making you launch new
+      terminal applications or switch to other
+      <acronym>TTY</acronym>s. Each of these shells we call windows
+      when in the context of <command>screen</command>. Before we can
+      cover nagivating between windows we'll first have to cover how
+      to create new windows.
+    </para>
+
+    <section xml:id="Screen-Navigating-Create-New-Window">
+      <title>Creating a New Window</title>
+      
+      <para>
+	Creating a new window is simple, just use the <keycap
+	function="control">C</keycap>-<keycap>a</keycap>
+	<keycap>c</keycap> key binding. Your display will now show a
+	new shell with your default prompt. An interactive listing of
+	all the windows associated with this screen is available
+	through the <keycap>C</keycap>-<keycap>a</keycap>
+	<keycap>"</keycap> key binding.
+      </para>
+    </section>
+
+    <section xml:id="Screen-Navigating-Between-Windows">
+      <title>Navigating Between Windows</title>
+
+      <para>
+	Navigation is simple, use these key bindings to get around.
+      </para>
+
+      <itemizedlist>
+	<title>Navigation Bindings</title>
+	
+	<listitem>
+	  <para>
+	    Next window: <keycap>C</keycap>-<keycap>a</keycap> <keycap>n</keycap>
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    Previous Window (1): <keycap>C</keycap>-<keycap>a</keycap> <keycap>p</keycap>
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    Previous Window (2) <keycap>C</keycap>-<keycap>a</keycap> <keycap function="backspace">backspace</keycap>
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    Toggle to the window displayed previously: <keycap>C</keycap>-<keycap>a</keycap> <keycap>C</keycap>-<keycap>a</keycap>
+	  </para>
+	</listitem>
+	<listitem>
+	  <para>
+	    Jump to window #<replaceable>x</replaceable>: <keycap>C</keycap>-<keycap>a</keycap> <keycap><replaceable>x</replaceable></keycap>
+	  </para>
+	</listitem>
+      </itemizedlist>
+
+    </section>
+
+    <section xml:id="Screen-Navigating-Closing-Windows">
+      <title>Closing Windows</title>
+      
+      <para>
+	Closing windows in <command>screen</command> deserves special
+	note -- not because it's difficult -- but because screen is
+	different from your normal shell with respect to closing
+	windows.
+      </para>
+
+      <para>
+	<command>Screen</command> will not be affected by a
+	<systemitem class="event">SIGHUP</systemitem> to your remote
+	connection (dropping your SSH connection), the process that
+	launched it terminating (closing your terminal), or even you
+	logging out. In those respects, <command>screen</command>'s
+	resilience is matched only by roaches, styrofoam, and
+	twinkies. Actually ending a <command>screen</command> session
+	requires closing all of the windows associated with that
+	screen. If you find yourself in the situation where screen is
+	handling many windows you may find it convenient to use the
+	quit macro. The quit macro is:
+	<keycap>C</keycap>-<keycap>a</keycap>
+	<keycap>C</keycap>-<keycap>\</keycap>. You will be asked to
+	confirm your action with the prompt: <computeroutput>Really
+	quit and kill all your windows [y/n]</computeroutput>. You
+	will know you have closed screen when you see the message
+	<computeroutput>[screen is terminating]</computeroutput>
+	followed by a fresh prompt.
+      </para>
+    </section>
+  </section>
+
+  <section xml:id="Screen-More-Information">
+    <title>More Information &amp; Customization</title>
+
+    <para>
+      In this chapter I've only just begun to touch on all of the
+      functionality provided by <command>screen</command>. With
+      <command>screen</command> you can also: copy and paste text
+      between windows, configure default window groups, display
+      multiple windows at the same time, write your paste buffer to a
+      file, named windows, and the list goes on...
+    </para>
+
+    <tip>
+      <title>
+	<command>Screen</command> has a man page.
+      </title>
+
+      <para>
+	The man page lists and describes all of the other key bindings
+	that I haven't mentioned here. It also describes the variables
+	allowed in a <filename>screenrc</filename> file.
+      </para>
+    </tip>
+
+    <tip>
+      <title>Get rid of the welcome window</title>
+
+      <para>
+	I can't stand the welcome window in
+	<command>screen</command>. That's why I always set
+	<varname>startup_message</varname> to <option>off</option> in
+	<filename>/etc/screenrc</filename> on my machines.
+      </para>
+    </tip>
+
+    <tip>
+      <title>Macking <keycap function="backspace">Backspace</keycap>
+      Work with OS X + <command>Screen</command> +
+      <command>Emacs</command></title>
+
+      <para>
+	You may find yourself geting Wuff'd at, or getting a lot of
+	help, if you're using OS X to run <command>emacs</command>
+	inside of a <command>screen</command> session on a remote
+	Linux host and use the <keycap
+	function="backspace">backspace</keycap> key. The <keycap
+	function="backspace">backspace</keycap> key gets mangled when
+	it goes through all of that. The "solution" (i.e., only thing
+	I found to work) requires minor reconfiguration of the OS X
+	Terminal application. In <command>Terminal</command>, go to
+	<menuchoice><guimenu>Terminal</guimenu><guimenuitem>Preferences</guimenuitem></menuchoice>,
+	and then select <guimenuitem>Advanced</guimenuitem>. Now where
+	it says <computeroutput>Declare terminal as:</computeroutput>
+	select <option>rxvt</option>. Also make sure that
+	<computeroutput>Delete sends Ctrl-H</computeroutput> isn't
+	selected. Finally, under the
+	<guimenuitem>Keyboard</guimenuitem> tab, check that
+	<computeroutput>Use option as meta key</computeroutput> is
+	selected. Be aware: altering your terminal type may require
+	adjusting your <filename>.bash*</filename> file to to account
+	for rxvt as a possible value of the <varname>$TERM</varname>
+	variable when setting your <varname>$PS1</varname> prompt
+	string.
+      </para>
+    </tip>
+  </section>
+</chapter>
